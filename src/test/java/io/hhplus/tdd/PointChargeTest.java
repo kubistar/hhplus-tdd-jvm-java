@@ -1,5 +1,6 @@
 package io.hhplus.tdd;
 
+import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
 import io.hhplus.tdd.point.PointService;
 import io.hhplus.tdd.point.UserPoint;
@@ -9,10 +10,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 public class PointChargeTest {
 
     private PointService pointService;
+    protected PointHistoryTable pointHistoryTable;
     private UserPointTable userPointTable;
 
     private static final Logger log = LoggerFactory.getLogger(PointChargeTest.class);
@@ -22,7 +25,8 @@ public class PointChargeTest {
     @BeforeEach
     void setUp() {
         userPointTable = new UserPointTable();
-        pointService = new PointService(userPointTable);
+        pointHistoryTable = mock(PointHistoryTable.class); // 누락됐던 부분
+        pointService = new PointService(userPointTable, pointHistoryTable);
     }
 
     @Test

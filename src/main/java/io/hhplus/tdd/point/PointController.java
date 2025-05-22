@@ -2,7 +2,9 @@ package io.hhplus.tdd.point;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -36,7 +38,12 @@ public class PointController {
     @GetMapping("{id}/histories")
     public List<PointHistory> history(@PathVariable long id)
     {
-        return List.of();
+        try {
+            return pointService.getHistories(id);
+        } catch (IllegalArgumentException e) {
+            log.warn("포인트 히스토리 조회 실패: userId={}, 사유={}", id, e.getMessage());
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
     }
 
     /**

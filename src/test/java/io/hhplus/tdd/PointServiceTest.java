@@ -1,5 +1,6 @@
 package io.hhplus.tdd;
 
+import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
 import io.hhplus.tdd.point.PointService;
 import io.hhplus.tdd.point.UserPoint;
@@ -13,13 +14,14 @@ public class PointServiceTest {
 
     private UserPointTable userPointTable;
     private PointService pointService;
+    private PointHistoryTable pointHistoryTable;
 
     private static final Logger log = LoggerFactory.getLogger(PointServiceTest.class);
 
     @BeforeEach
     void setUp() {
         userPointTable = new UserPointTable();
-        pointService = new PointService(userPointTable);
+        pointService = new PointService(userPointTable, pointHistoryTable);
     }
 
     @Test
