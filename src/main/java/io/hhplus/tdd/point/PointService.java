@@ -57,4 +57,34 @@ public class PointService {
 
         return updated;
     }
+
+    /**
+     * 특정 유저의 포인트를 사용하는 메서드
+     *
+     * @param userId 포인트를 사용할 유저의 ID
+     * @param amount 사용할 포인트 양 (0 이상의 정수)
+     * @return 사용 후의 UserPoint 객체
+     */
+    public UserPoint usePoint(long userId, long amount) {
+        log.info("Using points. userId={} amount={}", userId, amount);
+
+        if (amount < 0) {
+            throw new IllegalArgumentException("사용 금액은 0 이상이어야 합니다.");
+        }
+
+        // 현재 포인트 조회
+        UserPoint current = getPoint(userId);
+
+        if (current.point() < amount) {
+            throw new IllegalArgumentException("잔액이 부족합니다. 현재 잔액: " + current.point());
+        }
+
+        long newAmount = current.point() - amount;
+        UserPoint updated = userPointTable.insertOrUpdate(userId, newAmount);
+
+        log.info("사용한 포인트. 잔액 userId={} is {}", userId, updated.point());
+
+        return updated;
+    }
+
 }

@@ -34,9 +34,8 @@ public class PointController {
      * TODO - 특정 유저의 포인트 충전/이용 내역을 조회하는 기능을 작성해주세요.
      */
     @GetMapping("{id}/histories")
-    public List<PointHistory> history(
-            @PathVariable long id
-    ) {
+    public List<PointHistory> history(@PathVariable long id)
+    {
         return List.of();
     }
 
@@ -63,8 +62,9 @@ public class PointController {
     @PatchMapping("{id}/use")
     public UserPoint use(
             @PathVariable long id,
-            @RequestBody long amount
-    ) {
-        return new UserPoint(0, 0, 0);
+            @RequestBody long amount)
+    {
+        log.info("PATCH /point/{}/use 요청됨. amount={}", id, amount);
+        return pointService.usePoint(id, amount);
     }
 }
