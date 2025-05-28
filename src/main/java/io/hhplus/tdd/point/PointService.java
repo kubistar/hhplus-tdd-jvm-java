@@ -4,6 +4,7 @@ import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,6 +19,7 @@ public class PointService {
 
     // 사용자 단위로 락을 걸기 위한 맵
     private final Map<Long, Object> userLocks = new ConcurrentHashMap<>();
+    private final Map<Long, Long> lockLastUsed = new ConcurrentHashMap<>();
 
     private static final Logger log = LoggerFactory.getLogger(PointService.class);
 
@@ -118,6 +120,25 @@ public class PointService {
         }
         log.info("userId={}의 포인트 내역 {}건 반환", userId, histories.size());
         return histories;
+    }
+
+    /**
+     * 백그라운드에서 주기적으로 오래된 락 제거
+     */
+    @Scheduled(fixedRate = 300000) // 5분마다 실행
+    public void cleanupUnusedLocks() {
+        long cutoffTime = System.currentTimeMillis() - 600000; // 10분 이상 사용안된 락
+
+        lockLastUsed.entrySet().removeIf(entry -> {
+            if (entry.getValue() < cutoffTime) {
+                userLocks.remove(entry.getKey());
+                log.debug("Removed unused lock for userId: {}", entry.getKey());
+                return true;
+            }
+            return false;
+        });
+
+        log.debug("Lock cleanup completed. Current lock count: {}", userLocks.size());
     }
 
 }
