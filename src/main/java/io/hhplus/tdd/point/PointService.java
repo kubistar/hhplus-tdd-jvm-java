@@ -91,19 +91,23 @@ public class PointService {
             throw new IllegalArgumentException("사용 금액은 0 이상이어야 합니다.");
         }
 
-        // 현재 포인트 조회
-        UserPoint current = getPoint(userId);
+        // 사용자별 lock 객체 가져오기
+        Object lock = userLocks.computeIfAbsent(userId, k -> new Object());
+        synchronized (lock) {
+            // 현재 포인트 조회
+            UserPoint current = getPoint(userId);
 
-        if (current.point() < amount) {
-            throw new IllegalArgumentException("잔액이 부족합니다. 현재 잔액: " + current.point());
+            if (current.point() < amount) {
+                throw new IllegalArgumentException("잔액이 부족합니다. 현재 잔액: " + current.point());
+            }
+
+            long newAmount = current.point() - amount;
+            UserPoint updated = userPointTable.insertOrUpdate(userId, newAmount);
+
+            log.info("사용한 포인트. 잔액 userId={} is {}", userId, updated.point());
+
+            return updated;
         }
-
-        long newAmount = current.point() - amount;
-        UserPoint updated = userPointTable.insertOrUpdate(userId, newAmount);
-
-        log.info("사용한 포인트. 잔액 userId={} is {}", userId, updated.point());
-
-        return updated;
     }
 
     public List<PointHistory> getHistories(long userId) {
